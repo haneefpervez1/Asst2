@@ -1,5 +1,5 @@
 all: first
-first: bst.c
-	-gcc -g -Wall -Werror -fsanitize=address bst.c -o bst
+first: fileCompressor.c
+	-gcc -g -Wall -Werror -fsanitize=address fileCompressor.c bst.c -o fileCompressor
 clean:
-	rm -rf bst
+	rm -rf fileCompressor
