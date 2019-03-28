@@ -1,5 +1,5 @@
 #include "fileCompressor.h"
-
+/*
 int main (int argc, char** argv) {
 	FILE *fptr;
 	fptr = fopen(argv[1], "r");
@@ -22,7 +22,7 @@ int main (int argc, char** argv) {
 	*/
 	return 0;
 }
-
+*/
 void printDirectory() {
 	/*
 		Prints out files in current directory
