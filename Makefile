@@ -1,5 +1,5 @@
 all: first
-first: bst.c
-	-gcc -g -lm -Wall -Werror -fsanitize=address bst.c -o bst
+first: huffman.c
+	-gcc -g -lm -Wall -Werror -fsanitize=address huffman.c -o huffman
 clean:
-	rm -rf bst
+	rm -rf huffman
