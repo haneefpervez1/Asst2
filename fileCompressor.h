@@ -18,6 +18,7 @@ struct BSTnode {
 struct heapNode {
 	char* item;
 	int freq;
+	struct BSTNode *root;
 };
 struct heapNode* tokens[100];
 struct heapNode* minHeap[100];

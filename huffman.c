@@ -1,7 +1,7 @@
 #include "fileCompressor.h"
 
 int main (int argc, char** argv) {
-	printf("in bst\n");
+	printf("in huffman\n");
 	/*
 	FILE *fptr;
 	fptr = fopen(argv[1], "r");
@@ -19,12 +19,15 @@ int main (int argc, char** argv) {
 	char* example = "this this this is is a a a file that that that that that tests a program";
 	tokenizeString(example);
 	buildHeap();
+	/*
 	struct heapNode* min = deleteMin();
 	printf("min %s %d\n", min->item, min->freq);
 	struct heapNode* min2 = deleteMin();
 	printf("min2 %s %d\n", min2->item, min2->freq);
+	insertHeap(min);
+	*/
 	int i = 0;
-	for (i = 0; i < 7; i++) {
+	for (i = 0; i < heapIndex; i++) {
 		printf("item %s freq %d\n", minHeap[i]->item, minHeap[i]->freq);
 	}
 	//int present = checkIfPresent("file");
@@ -49,6 +52,7 @@ void tokenizeString (char* str) {
 				temp->item = (char*)malloc((length+1)*sizeof(char));
 				strcpy(temp->item, substr);
 				temp->freq = 1;
+				temp->root = NULL;
 				tokens[k] = temp;
 				k++;
 			} 
@@ -127,7 +131,7 @@ void bubbleDown() {
 	printf("node containing %s %d will be removed\n", minHeap[0]->item, minHeap[0]->freq);
 	heapIndex--;
 	minHeap[0] = minHeap[heapIndex];
-	//minHeap[heapIndex] = NULL;
+	minHeap[heapIndex] = NULL;
 	int left = 1; int right = 2; int parent = 0;
 	/*
 		might segfault if tree is unbalanced, havent tested yet
