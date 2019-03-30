@@ -34,6 +34,8 @@ int checkIfPresent (char* str, int limit);
 void buildHeap();
 void bubbleUp(int index);
 void insertHeap(struct heapNode *);
+struct heapNode* deleteMin();
+void bubbleDown();
 /*
 	fileCompressor functions
 */

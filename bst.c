@@ -19,6 +19,10 @@ int main (int argc, char** argv) {
 	char* example = "this this this is is a a a file that that that that that tests a program";
 	tokenizeString(example);
 	buildHeap();
+	struct heapNode* min = deleteMin();
+	printf("min %s %d\n", min->item, min->freq);
+	struct heapNode* min2 = deleteMin();
+	printf("min2 %s %d\n", min2->item, min2->freq);
 	int i = 0;
 	for (i = 0; i < 7; i++) {
 		printf("item %s freq %d\n", minHeap[i]->item, minHeap[i]->freq);
@@ -27,7 +31,9 @@ int main (int argc, char** argv) {
 	//printf("present %d\n", present);
 	return 0;
 }
-
+/*
+	tokenizes string and puts in token array
+*/
 void tokenizeString (char* str) {
 	int length = strlen(str);
 	int i = 0, j = 0, k = 0;							   
@@ -50,7 +56,9 @@ void tokenizeString (char* str) {
 		}
 	}
 }
-
+/*
+	checks if token is already present, and if it is, increases freq
+*/
 int checkIfPresent (char* str, int limit) {
 	if (limit == 0) {
 		return -1;
@@ -64,13 +72,15 @@ int checkIfPresent (char* str, int limit) {
 	}
 	return -1;
 }	
-
+/*
+	Bubbles inserted heap node
+*/
 void bubbleUp(int index) {
 	int parentIndex = (int)(ceil((double)(index-2)/2));
 	if (parentIndex < 0) {
 		parentIndex = 0;
 	}
-	printf("the node containing %s %d at %d will be bubbled up and the parent is %d\n", minHeap[index]->item, minHeap[index]->freq, index, parentIndex);
+	//printf("the node containing %s %d at %d will be bubbled up and the parent is %d\n", minHeap[index]->item, minHeap[index]->freq, index, parentIndex);
 	while (minHeap[parentIndex]->freq > minHeap[index]->freq) {
 		struct heapNode* temp = minHeap[parentIndex];
 		minHeap[parentIndex] = minHeap[index];
@@ -82,14 +92,18 @@ void bubbleUp(int index) {
 		}
 	}
 }
-
+/*
+	builds heap after token array is done
+*/
 void buildHeap() {
 	int i = 0;
 	for (i = 0; i < 7; i++) {
 		insertHeap(tokens[i]);
 	}
 }
-
+/*
+	inserts token arrays into heap
+*/
 void insertHeap(struct heapNode *toBeInserted) {
 	//printf("item: %s freq: %d will be inserted at %d\n", toBeInserted->item, toBeInserted->freq, heapIndex);
 	minHeap[heapIndex] = toBeInserted;
@@ -97,6 +111,49 @@ void insertHeap(struct heapNode *toBeInserted) {
 		bubbleUp(heapIndex);
 	}
 	heapIndex++;
+}
+/*
+	deletes min
+*/
+struct heapNode* deleteMin() {
+	struct heapNode *min = minHeap[0];
+	bubbleDown();
+	return min;
+}
+/*
+	bubble down method for heap
+*/
+void bubbleDown() {
+	printf("node containing %s %d will be removed\n", minHeap[0]->item, minHeap[0]->freq);
+	heapIndex--;
+	minHeap[0] = minHeap[heapIndex];
+	int left = 1; int right = 2; int parent = 0;
+	/*
+		might segfault if tree is unbalanced, havent tested yet
+	*/
+	while (minHeap[parent]->freq > minHeap[left]->freq || minHeap[parent]->freq > minHeap[right]->freq) {
+		if (minHeap[left]->freq < minHeap[right]->freq) {
+			struct heapNode* temp = minHeap[left];
+			minHeap[left] = minHeap[parent];
+			minHeap[parent] = temp;
+			parent = left;
+			if (parent <= heapIndex) {
+				return;
+			}
+			left = 2*parent+1;
+			right = 2*parent+2;
+		} else if (minHeap[left]->freq > minHeap[right]->freq) {
+			struct heapNode* temp = minHeap[right];
+			minHeap[right] = minHeap[parent];
+			minHeap[parent] = temp;
+			parent = right;
+			if (parent <= heapIndex) {
+				return;
+			}
+			left = 2*parent+1;
+			right = 2*parent+2;
+		}
+	} 
 }
 
 struct BSTnode *newNode(int key) {
