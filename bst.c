@@ -16,11 +16,12 @@ int main (int argc, char** argv) {
 	printf("There are %d words in this file.\n", numWords+1);
 	fclose(fptr);
 	*/
-	char* example = "this is a a a a a file that tests a program";
+	char* example = "this this this is is a a a file that that that that that tests a program";
 	tokenizeString(example);
+	buildHeap();
 	int i = 0;
 	for (i = 0; i < 7; i++) {
-		printf("item: %s freq: %d\n", minHeap[i]->item, minHeap[i]->freq);
+		printf("item %s freq %d\n", minHeap[i]->item, minHeap[i]->freq);
 	}
 	//int present = checkIfPresent("file");
 	//printf("present %d\n", present);
@@ -42,7 +43,7 @@ void tokenizeString (char* str) {
 				temp->item = (char*)malloc((length+1)*sizeof(char));
 				strcpy(temp->item, substr);
 				temp->freq = 1;
-				minHeap[k] = temp;
+				tokens[k] = temp;
 				k++;
 			} 
 			j = i+1;							   
@@ -56,13 +57,47 @@ int checkIfPresent (char* str, int limit) {
 	}
 	int i = 0;
 	for (i = 0; i < limit; i++) {
-		if (strcmp(minHeap[i]->item, str) == 0) {
-			minHeap[i]->freq = minHeap[i]->freq + 1;
+		if (strcmp(tokens[i]->item, str) == 0) {
+			tokens[i]->freq = tokens[i]->freq + 1;
 			return i;
 		}
 	}
 	return -1;
 }	
+
+void bubbleUp(int index) {
+	int parentIndex = (int)(ceil((double)(index-2)/2));
+	if (parentIndex < 0) {
+		parentIndex = 0;
+	}
+	printf("the node containing %s %d at %d will be bubbled up and the parent is %d\n", minHeap[index]->item, minHeap[index]->freq, index, parentIndex);
+	while (minHeap[parentIndex]->freq > minHeap[index]->freq) {
+		struct heapNode* temp = minHeap[parentIndex];
+		minHeap[parentIndex] = minHeap[index];
+		minHeap[index] = temp;
+		index = parentIndex;
+		parentIndex = (int)(ceil((double)(index-2)/2));
+		if (parentIndex < 0) {
+			parentIndex = 0;
+		}
+	}
+}
+
+void buildHeap() {
+	int i = 0;
+	for (i = 0; i < 7; i++) {
+		insertHeap(tokens[i]);
+	}
+}
+
+void insertHeap(struct heapNode *toBeInserted) {
+	//printf("item: %s freq: %d will be inserted at %d\n", toBeInserted->item, toBeInserted->freq, heapIndex);
+	minHeap[heapIndex] = toBeInserted;
+	if (heapIndex != 0) {
+		bubbleUp(heapIndex);
+	}
+	heapIndex++;
+}
 
 struct BSTnode *newNode(int key) {
 	struct BSTnode *temp = (struct BSTnode *)malloc(sizeof(struct BSTnode));
