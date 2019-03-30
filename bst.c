@@ -16,10 +16,14 @@ int main (int argc, char** argv) {
 	printf("There are %d words in this file.\n", numWords+1);
 	fclose(fptr);
 	*/
-	char* example = "this is file that tests a program";
+	char* example = "this is a a a a a file that tests a program";
 	tokenizeString(example);
-	int present = checkIfPresent("this");
-	printf("present %d\n", present);
+	int i = 0;
+	for (i = 0; i < 7; i++) {
+		printf("item: %s freq: %d\n", minHeap[i]->item, minHeap[i]->freq);
+	}
+	//int present = checkIfPresent("file");
+	//printf("present %d\n", present);
 	return 0;
 }
 
@@ -32,31 +36,32 @@ void tokenizeString (char* str) {
 			char* substr = malloc(length+1);
 			strncpy(substr, str+j, length); 	   
 			substr[length] = '\0';
-			//int present = checkIfPresent(substr);
-			//if (present == 0) {
+			int present = checkIfPresent(substr, k);
+			if (present == -1) {
 				struct heapNode* temp= (struct heapNode*)malloc(sizeof(struct heapNode));
 				temp->item = (char*)malloc((length+1)*sizeof(char));
 				strcpy(temp->item, substr);
 				temp->freq = 1;
-				printf("item: %s\nfreq: %d\n", temp->item, temp->freq);
 				minHeap[k] = temp;
 				k++;
-			//}
+			} 
 			j = i+1;							   
 		}
 	}
 }
 
-int checkIfPresent (char* str) {
+int checkIfPresent (char* str, int limit) {
+	if (limit == 0) {
+		return -1;
+	}
 	int i = 0;
-	for (i = 0; i < 7; i++) {
+	for (i = 0; i < limit; i++) {
 		if (strcmp(minHeap[i]->item, str) == 0) {
-			int temp = minHeap[i]->freq;
-			minHeap[i]->freq = temp+1;
-			return 1;
+			minHeap[i]->freq = minHeap[i]->freq + 1;
+			return i;
 		}
 	}
-	return 0;
+	return -1;
 }	
 
 struct BSTnode *newNode(int key) {
