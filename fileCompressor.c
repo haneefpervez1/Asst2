@@ -22,19 +22,24 @@ int main (int argc, char** argv) {
 	return 0;
 }
 */
-void buildCB(char * file)
+void buildCB(char * file, int fd)
 {
  mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+ char* buff[1];
  int CB = creat("HuffmanCodeBook", mode);
- write(CB, "my cock", strlen("my cock")); 
+ int x = read(fd, tok, 1);
+ 	while(x!=0)
+ 	{
+ 	 
+ 	}
 }
-void compress(char * file)
+void compress(char * file, int fd, char* codebook)
 {
-
+  
 }
-void decompress(char* file)
+void decompress(char* file, int fd, char* codebook)
 {
-
+ 
 }
 void printDirectory() {
 	/*
@@ -58,19 +63,25 @@ int main (int argc, char ** argv)
  char* flag = argv[1];
  char* file = argv[2];
  char* codebook = argv[3];
- printf("%s %s %s", flag, file, codebook);
- printDirectory();
- buildCB(file);
+ //printf("%s %s %s", flag, file, codebook);
+ //printDirectory();
  	switch(flag[1])
  	{
  	 case('b'):
- 	  fd = open(file, 0);
+ 	  fd = open(file, O_RDONLY | O_CREAT);
+ 	  buildCB(file, fd);
+ 	  close(fd);
+ 	 // printf("%d", fd);
  	  break;
  	 case('c'):
+ 	  fd = open(file, O_RDONLY | O_CREAT); 
+ 	  compress(file, fd, codebook);
  	  break;
  	 case('d'):
+ 	  decompress(file, fd, codebook);
  	  break;
  	 case('R'):
+ 	  
  	 break;
  	}
   return 0;

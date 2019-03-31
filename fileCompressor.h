@@ -47,9 +47,9 @@ void printHeap();
 	fileCompressor functions
 */
 void printDirectory();
-void buildCB( char * file);
-void compress( char * file);
-void decompress( char * file);
+void buildCB( char * file, int fd);
+void compress( char * file, int fd, char* codebook);
+void decompress( char * file, int fd, char* codebook);
 
 
 
