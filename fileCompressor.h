@@ -7,18 +7,19 @@
 
 /*
 	BST struct
-*/
+
 struct BSTnode {
-	int key;
+	struct heapNode* item;
 	struct BSTnode *left, *right;
 };
+*/
 /*
 	Heap node
 */
 struct heapNode {
 	char* item;
 	int freq;
-	struct BSTNode *root;
+	struct heapNode *left, *right;
 };
 struct heapNode* tokens[100];
 struct heapNode* minHeap[100];
@@ -26,10 +27,7 @@ int heapIndex = 0;
 /*
 	BST Functions
 */
-struct BSTnode *newNode(int);
-struct BSTnode * insert (struct BSTnode *, int);
-struct BSTnode * search (struct BSTnode *, int);
-void inorder(struct BSTnode *);
+//void inorder(struct BSTnode *);
 void tokenizeString(char* str);
 int checkIfPresent (char* str, int limit);
 void buildHeap();
@@ -37,6 +35,8 @@ void bubbleUp(int index);
 void insertHeap(struct heapNode *);
 struct heapNode* deleteMin();
 void bubbleDown();
+void buildTree(struct heapNode*, struct heapNode*);
+void buildHuffmanTree();
 /*
 	fileCompressor functions
 */
