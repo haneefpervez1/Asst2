@@ -19,7 +19,6 @@ int main (int argc, char** argv) {
 	while(!feof(fptr)){
 		fscanf(fptr, "%s", 
 	}
-	*/
 	return 0;
 }
 */
@@ -38,4 +37,24 @@ void printDirectory() {
 		printf("%s\n", de->d_name);
 	}
 	closedir(dr);
+}
+int main (int argc, char ** argv)
+{
+ char* flag = argv[1];
+ char* file = argv[2];
+ char* codebook = argv[3];
+ printf("%s %s %s", flag, file, codebook);
+ 	switch(flag[1])
+ 	{
+ 	 case('b'):
+ 	  
+ 	  break;
+ 	 case('c'):
+ 	  break;
+ 	 case('d'):
+ 	  break;
+ 	 case('R'):
+ 	 break;
+ 	}
+  return 0;
 }
