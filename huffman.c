@@ -30,7 +30,7 @@ int main (int argc, char** argv) {
 	//insertHeap(newNode);
 	int i = 0;
 	for (i = 0; i < heapIndex; i++) {
-		printf("item %s freq %d\n", minHeap[i]->item, minHeap[i]->freq);
+		printf("item %s: %d\n", minHeap[i]->item, minHeap[i]->freq);
 	}
 	
 	//int present = checkIfPresent("file");
@@ -125,62 +125,32 @@ void insertHeap(struct heapNode *toBeInserted) {
 */
 struct heapNode* deleteMin() {
 	struct heapNode *min = minHeap[0];
-	bubbleDown();
+	heapIndex--;
+	minHeap[0] = minHeap[heapIndex];
+	minHeap[heapIndex] = NULL;
+	bubbleDown(0);
 	return min;
 }
 /*
 	bubble down method for heap
 */
-void bubbleDown() {
-	//printf("node containing %s %d will be removed\n", minHeap[0]->item, minHeap[0]->freq);
-	heapIndex--;
-	minHeap[0] = minHeap[heapIndex];
-	minHeap[heapIndex] = NULL;
-	int left = 1; int right = 2; int parent = 0;
-	/*
-		might segfault if tree is unbalanced, havent tested yet
-	*/
-	printf("-------bubble down-------\n");
-	printf("heapIndex %d\n", heapIndex);
-	int i = 0;
-	for (i = 0; i < heapIndex; i++) {
-		printf("item %s freq %d\n", minHeap[i]->item, minHeap[i]->freq);
+void bubbleDown(int index) {
+	int smallest = index;
+	int left = 2 * index + 1;
+	int right = 2 * index + 2;
+	if (left < heapIndex && minHeap[left]->freq < minHeap[smallest]->freq) {
+		smallest = left;
 	}
-	while (minHeap[parent]->freq > minHeap[left]->freq || minHeap[parent]->freq > minHeap[right]->freq) {
-		//printf("comparing %s %d with %s %d and %s %d\n", minHeap[parent]->item, minHeap[parent]->freq, minHeap[left]->item, minHeap[left]->freq, minHeap[right]->item, minHeap[right]->freq);
-		if (minHeap[left]->freq <= minHeap[right]->freq) {
-			struct heapNode* temp = minHeap[left];
-			minHeap[left] = minHeap[parent];
-			minHeap[parent] = temp;
-			parent = left;
-			//printf("bubbledown left\n");
-			//printf("parent before segfault %d\n", parent);
-			left = 2*parent+1;
-			right = 2*parent+2;
-			if (right >= heapIndex || left >= heapIndex) {
-				//printf("right %d\n", right);
-				return;
-			}
-			//printf("parent %d left %d right %d heap Index %d\n", parent, left, right, heapIndex);
-		} else if (minHeap[left]->freq > minHeap[right]->freq) {
-			struct heapNode* temp = minHeap[right];
-			minHeap[right] = minHeap[parent];
-			minHeap[parent] = temp;
-			parent = right;
-			//printf("bubbledown right\n");
-			if (parent <= heapIndex) {
-				//printf("parent %d\n", parent);
-				return;
-			}
-			left = 2*parent+1;
-			right = 2*parent+2;
-			if (right >= heapIndex || left >= heapIndex) {
-				//printf("parent %d\n", parent);
-				return;
-			}
-			//printf("parent %d left %d right %d\n", parent, left, right);
-		}
-	} 
+	if (right < heapIndex && minHeap[right]->freq < minHeap[smallest]->freq) {
+		smallest = right;
+	}
+	if (smallest != index) {
+		printf("node %s: %d will swapped with %s: %d\n", minHeap[index]->item, minHeap[index]->freq, minHeap[smallest]->item, minHeap[smallest]->freq);
+		struct heapNode* temp = minHeap[smallest];
+		minHeap[smallest] = minHeap[index];
+		minHeap[index] = temp;
+		bubbleDown(smallest);
+	}
 }
 
 void buildTree(struct heapNode* node1, struct heapNode* node2) {
@@ -200,26 +170,35 @@ void buildHuffmanTree() {
 		struct heapNode * first = deleteMin();
 		struct heapNode * second = deleteMin();
 		buildTree(first, second);
-	
+		int i = 0;
+	for (i = 0; i < heapIndex; i++) {
+		printf("item %s: %d\n", minHeap[i]->item, minHeap[i]->freq);
+	}
 		struct heapNode * third = deleteMin();
 		struct heapNode * fourth = deleteMin();
 		//printf("third is %s %d fourth is %s %d\n", third->item, third->freq, fourth->item, fourth->freq);
 		
 		buildTree(third, fourth);
-		
+		/*
 		struct heapNode * fifth = deleteMin();
 		struct heapNode * sixth = deleteMin();
 		buildTree(fifth, sixth);
-	int i = 0;
-	for (i = 0; i < heapIndex; i++) {
-		printf("item %s freq %d\n", minHeap[i]->item, minHeap[i]->freq);
-	}
-	/*
-		This part causes the segfault - in bubble down, one of the children is null
+		printf("--min heap--\n");
+		int i = 0;
+		for (i = 0; i < heapIndex; i++) {
+			printf("item %s freq %d\n", minHeap[i]->item, minHeap[i]->freq);
+		}
+
 	*/
+	/*
+	
+		This part causes the segfault - in bubble down, one of the children is null
+	
+	
 		struct heapNode * seventh = deleteMin();
 		struct heapNode * eighth = deleteMin();
 		buildTree(seventh, eighth);
+	*/
 		/*
 		struct heapNode * ninth = deleteMin();
 		struct heapNode * tenth = deleteMin();
@@ -238,5 +217,7 @@ void buildHuffmanTree() {
 	}
 	*/
 }
+
+
 
 
