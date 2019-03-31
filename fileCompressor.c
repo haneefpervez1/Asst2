@@ -22,6 +22,20 @@ int main (int argc, char** argv) {
 	return 0;
 }
 */
+void buildCB(char * file)
+{
+ mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+ int CB = creat("HuffmanCodeBook", mode);
+ write(CB, "my cock", strlen("my cock")); 
+}
+void compress(char * file)
+{
+
+}
+void decompress(char* file)
+{
+
+}
 void printDirectory() {
 	/*
 		Prints out files in current directory
@@ -40,14 +54,17 @@ void printDirectory() {
 }
 int main (int argc, char ** argv)
 {
+ int fd;
  char* flag = argv[1];
  char* file = argv[2];
  char* codebook = argv[3];
  printf("%s %s %s", flag, file, codebook);
  printDirectory();
+ buildCB(file);
  	switch(flag[1])
  	{
  	 case('b'):
+ 	  fd = open(file, 0);
  	  break;
  	 case('c'):
  	  break;

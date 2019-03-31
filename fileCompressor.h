@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <dirent.h>
 #include <string.h>
 #include <ctype.h>
@@ -43,3 +44,9 @@ void buildHuffmanTree();
 	fileCompressor functions
 */
 void printDirectory();
+void buildCB( char * file);
+void compress( char * file);
+void decompress( char * file);
+
+
+
