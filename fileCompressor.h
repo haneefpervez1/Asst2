@@ -27,12 +27,13 @@ struct heapNode {
 struct heapNode* tokens[100];
 struct heapNode* minHeap[100];
 int heapIndex = 0;
+int limit = 0;
 /*
 	BST Functions
 */
 //void inorder(struct BSTnode *);
 void tokenizeString(char* str);
-int checkIfPresent (char* str, int limit);
+int checkIfPresent (char* str);
 void buildHeap();
 void bubbleUp(int index);
 void insertHeap(struct heapNode *);
@@ -40,6 +41,8 @@ struct heapNode* deleteMin();
 void bubbleDown();
 void buildTree(struct heapNode*, struct heapNode*);
 void buildHuffmanTree();
+void printPreorder(struct heapNode *node);
+void printHeap();
 /*
 	fileCompressor functions
 */
