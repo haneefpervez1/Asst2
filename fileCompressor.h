@@ -24,8 +24,18 @@ struct heapNode {
 	int freq;
 	struct heapNode *left, *right;
 };
-struct heapNode* tokens[100];
-struct heapNode* minHeap[100];
+/*
+	struct to store huffman encoding
+*/
+struct huffmanNode {
+	char* token;
+	int* code;
+	int limit;
+	struct huffmanNode *next;
+};
+struct huffmanNode * head;
+struct heapNode* tokens[1000];
+struct heapNode* minHeap[1000];
 int heapIndex = 0;
 int limit = 0;
 /*
@@ -41,6 +51,8 @@ struct heapNode* deleteMin();
 void bubbleDown();
 void buildTree(struct heapNode*, struct heapNode*);
 void buildHuffmanTree();
+int isLeaf(struct heapNode *);
+void compressTree (struct heapNode*, int [], int);
 void printPreorder(struct heapNode *node);
 void printHeap();
 /*

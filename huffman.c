@@ -18,25 +18,20 @@ int main (int argc, char** argv) {
 	*/
 	//char* example = "this this this is is a a a file that that that that that tests a program";
 	char* example = "a a a a a dog dog dog dog dog dog dog dog dog cat cat cat cat cat cat cat cat cat cat cat cat button button button button button button button button button button button button button ball ball ball ball ball ball ball ball ball ball ball ball ball ball ball ball and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and";
+	//char* example = "a b c d e f a b c d e f a b c d e f a b c d e f a b c d e f b c d e f b c d e f b c d e f b c d e f c d e f c d e f c d e f d e f e f e f e f f f f f f f f f f f f f f f f f f f f f f f f f f f f f f"; 
 	tokenizeString(example);
 	buildHeap();
 	buildHuffmanTree();
-	
-	//struct heapNode* min = deleteMin();
-	//printf("min %s %d\n", min->item, min->freq);
-	//struct heapNode* min2 = deleteMin();
-	//printf("min2 %s %d\n", min2->item, min2->freq);
-	//buildTree(min, min2);
-	
-	//insertHeap(newNode);
-	/*
-	int i = 0;
-	for (i = 0; i < heapIndex; i++) {
-		printf("item %s: %d\n", minHeap[i]->item, minHeap[i]->freq);
+	struct huffmanNode* start = head;
+	while (start != NULL) {
+		printf("%s: ", start->token);
+		int i = 0;
+		for (i = 0; i < start->limit; i++) {
+			printf("%d", start->code[i]);
+		}
+		printf("\n");
+		start = start->next;
 	}
-	*/
-	//int present = checkIfPresent("file");
-	//printf("present %d\n", present);
 	return 0;
 }
 /*
@@ -46,7 +41,7 @@ void tokenizeString (char* str) {
 	int length = strlen(str);
 	int i = 0, j = 0;							   
 	for (i = 0, j = 0; i < length+1; i++){         
-		if (str[i] == '\0' || !isalpha(str[i])){   
+		if (str[i] == '\0' || !isalpha(str[i])){   // !!!!checks non alphanumeric char instead only spaces
 			int length = i-j;
 			char* substr = malloc(length+1);
 			strncpy(substr, str+j, length); 	   
@@ -60,7 +55,7 @@ void tokenizeString (char* str) {
 				temp->left = NULL;
 				temp->right = NULL;
 				tokens[limit] = temp;
-				limit++;
+				limit++;						// make sure tokens[] doesnt seg fault
 			} 
 			j = i+1;							   
 		}
@@ -170,34 +165,7 @@ void buildTree(struct heapNode* node1, struct heapNode* node2) {
 }
 
 void buildHuffmanTree() {
-		/*
-		//printf("heapindex %d\n", heapIndex);
-		struct heapNode * first = deleteMin();
-		struct heapNode * second = deleteMin();
-		buildTree(first, second);
-		//printHeap();
-		struct heapNode * third = deleteMin();
-		struct heapNode * fourth = deleteMin();
-		//printf("third is %s %d fourth is %s %d\n", third->item, third->freq, fourth->item, fourth->freq);
-		buildTree(third, fourth);
-		//printHeap();
 		
-		struct heapNode * fifth = deleteMin();
-		struct heapNode * sixth = deleteMin();
-		buildTree(fifth, sixth);
-		//printHeap();
-		
-		struct heapNode * seventh = deleteMin();
-		struct heapNode * eighth = deleteMin();
-		buildTree(seventh, eighth);
-		printHeap();
-		
-		struct heapNode * ninth = deleteMin();
-		struct heapNode * tenth = deleteMin();
-		buildTree(ninth, tenth);
-		//printHeap();
-		//printHeap();
-		*/
 		while (heapIndex != 2) {
 			struct heapNode *temp1 = deleteMin();
 			struct heapNode *temp2 = deleteMin();
@@ -212,19 +180,54 @@ void buildHuffmanTree() {
 			buildTree(temp1, temp2);
 		}
 		//printHeap();
-		printPreorder(minHeap[0]);
-	/*
-	int i = 0;
-	for (i = 0; i < heapIndex; i++) {
-		printf("item %s freq %d\n", minHeap[i]->item, minHeap[i]->freq);
+		//printPreorder(minHeap[0]);
+		int arr[100], top = 0;
+		compressTree(minHeap[0], arr, top);
+
+}
+
+int isLeaf(struct heapNode * node) {
+	if (node->left == NULL && node->right == NULL) {
+		return 1;
 	}
-	while (minHeap[1] != NULL) {
-		printf("heapindex %d", heapIndex);
-		struct heapNode* first = deleteMin();
-		struct heapNode* second = deleteMin();
-		buildTree(first, second);
+	return 0;
+}
+
+void compressTree (struct heapNode* root, int arr[], int top) {
+	if (root->left != NULL) {
+		arr[top] = 0;
+		compressTree(root->left, arr, top+1);
 	}
-	*/
+	if (root->right != NULL) {
+		arr[top] = 1;
+		compressTree(root->right, arr, top+1);
+	}
+	if (isLeaf(root) == 1) {
+		//printf(" leaf %s: %d\n", root->item, root->freq);
+		int* encoding = (int*)malloc(top*sizeof(int));
+		int i = 0;
+		for (i = 0; i < top; i++) {
+			encoding[i] = arr[i];
+		}
+		struct huffmanNode* temp = (struct huffmanNode*)malloc(sizeof(struct huffmanNode));
+		int length = strlen(root->item);
+		//printf("%d\n", length);
+		temp->token = (char*)malloc((length+1)*sizeof(char));
+		strcpy(temp->token, root->item);
+		temp->token[length] = '\0';
+		temp->code = encoding;
+		temp->limit = top;
+		struct huffmanNode* start = head;
+		if (start == NULL) {
+			head = temp;
+		} else {
+			while (start->next != NULL) {
+				start = start->next; 
+			}
+			start->next = temp;
+			//start = start->next;
+		}
+	}
 }
 
 void printHeap() {
@@ -237,15 +240,14 @@ void printHeap() {
 }
 
 void printPreorder(struct heapNode *node) { 
-     if (node == NULL) 
-          return; 
-  
+    if (node == NULL) 
+          return;
      /* first print data of node */
-     printf("%d ", node->freq);   
+    printf("%d ", node->freq);   
   	
      /* then recur on left sutree */
-     printPreorder(node->left);   
+    printPreorder(node->left);   
   
      /* now recur on right subtree */
-     printPreorder(node->right); 
+    printPreorder(node->right); 
 } 
