@@ -44,10 +44,10 @@ int main (int argc, char ** argv)
  char* file = argv[2];
  char* codebook = argv[3];
  printf("%s %s %s", flag, file, codebook);
+ printDirectory();
  	switch(flag[1])
  	{
  	 case('b'):
- 	  
  	  break;
  	 case('c'):
  	  break;
