@@ -23,7 +23,7 @@ struct BSTnode {
 struct heapNode {
 	char* item;
 	int freq;
-	struct heapNode *left, *right;
+        struct heapNode *left, *right;
 };
 /*
 	struct to store huffman encoding

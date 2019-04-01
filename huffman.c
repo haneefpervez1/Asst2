@@ -1,4 +1,4 @@
-#include "fileCompressor.h"
+
 
 int main (int argc, char** argv) {
 	printf("in huffman\n");
