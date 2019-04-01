@@ -16,8 +16,8 @@ int main (int argc, char** argv) {
 	printf("There are %d words in this file.\n", numWords+1);
 	fclose(fptr);
 	*/
-	//char* example = "this this this is is a a a file that that that that that tests a program";
-	char* example = "a a a a a dog dog dog dog dog dog dog dog dog cat cat cat cat cat cat cat cat cat cat cat cat button button button button button button button button button button button button button ball ball ball ball ball ball ball ball ball ball ball ball ball ball ball ball and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and";
+	char* example = "this this this is is a a a file that that that that that tests a program";
+	//char* example = "a a a a a dog dog dog dog dog dog dog dog dog cat cat cat cat cat cat cat cat cat cat cat cat button button button button button button button button button button button button button ball ball ball ball ball ball ball ball ball ball ball ball ball ball ball ball and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and";
 	//char* example = "a b c d e f a b c d e f a b c d e f a b c d e f a b c d e f b c d e f b c d e f b c d e f b c d e f c d e f c d e f c d e f d e f e f e f e f f f f f f f f f f f f f f f f f f f f f f f f f f f f f f"; 
 	tokenizeString(example);
 	buildHeap();
@@ -32,6 +32,7 @@ int main (int argc, char** argv) {
 		printf("\n");
 		start = start->next;
 	}
+	compressString(example);
 	return 0;
 }
 /*
@@ -228,6 +229,38 @@ void compressTree (struct heapNode* root, int arr[], int top) {
 			//start = start->next;
 		}
 	}
+}
+
+void compressString(char* str) {
+	int length = strlen(str);
+	int i = 0, j = 0;							   
+	for (i = 0, j = 0; i < length+1; i++){         
+		if (str[i] == '\0' || !isalpha(str[i])){   // !!!!checks non alphanumeric char instead only spaces
+			int length = i-j;
+			char* substr = malloc(length+1);
+			strncpy(substr, str+j, length); 	   
+			substr[length] = '\0';
+			printCode(substr);
+			j = i+1;							   
+		}
+	}
+	printf("\n");
+}
+
+void printCode(char* str) {
+	//printf("%s will be compressed ", str);
+	
+	struct huffmanNode * start = head;
+	while (start != NULL) {
+		if (strcmp(start->token, str) == 0) {
+			int i = 0;
+			for (i = 0; i < start->limit; i++) {
+				printf("%d", start->code[i]);
+			}
+		}
+		start = start->next;
+	}
+	//printf("\n");
 }
 
 void printHeap() {

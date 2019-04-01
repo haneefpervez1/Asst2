@@ -53,6 +53,8 @@ void buildTree(struct heapNode*, struct heapNode*);
 void buildHuffmanTree();
 int isLeaf(struct heapNode *);
 void compressTree (struct heapNode*, int [], int);
+void compressString(char*);
+void printCode(char*);
 void printPreorder(struct heapNode *node);
 void printHeap();
 /*
