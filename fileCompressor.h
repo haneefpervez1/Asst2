@@ -7,6 +7,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include <unistd.h>
 
 /*
 	BST struct
@@ -53,6 +54,7 @@ void buildTree(struct heapNode*, struct heapNode*);
 void buildHuffmanTree();
 int isLeaf(struct heapNode *);
 void compressTree (struct heapNode*, int [], int);
+void buildCodeBook();
 void compressString(char*);
 void decompressString(struct huffmanNode* , char* );
 void printCode(char*);

@@ -16,10 +16,11 @@ int main (int argc, char** argv) {
 	printf("There are %d words in this file.\n", numWords+1);
 	fclose(fptr);
 	*/
-	char* example = "this     this this is is a a a   file that     that that that that tests a program";
-	//char* example = "a a a a a dog dog dog   dog dog dog dog dog dog cat cat cat cat cat cat cat cat cat cat cat cat button button button button button button button button button button button button button ball ball ball ball ball ball ball ball ball ball ball ball ball ball ball ball and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and";
+	//char* example1 = "this     this this is is a a a   file that     that that that that tests a program";
+	char* example2 = "a a a a a dog dog dog   dog dog dog dog dog dog cat cat cat cat cat cat cat cat cat cat cat cat button button button button button button button button button button button button button ball ball ball ball ball ball ball ball ball ball ball ball ball ball ball ball and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and and";
 	//char* example = "a b c d e f a b c d e f a b c d e f a b c d e f a b c d e f b c d e f b c d e f b c d e f b c d e f c d e f c d e f c d e f d e f e f e f e f f f f f f f f f f f f f f f f f f f f f f f f f f f f f f"; 
-	tokenizeString(example);
+	tokenizeString(example2);
+	//tokenizeString(example2);
 	buildHeap();
 	buildHuffmanTree();
 	struct huffmanNode* start = head;
@@ -32,8 +33,10 @@ int main (int argc, char** argv) {
 		printf("\n");
 		start = start->next;
 	}
+	buildCodeBook();
+	char* example = "a program that tests a file";
 	compressString(example);
-	char* decompressed = "00101100";
+	char* decompressed = "1011011110001100";
 	decompressString(head, decompressed);
 	return 0;
 }
@@ -234,6 +237,32 @@ void compressTree (struct heapNode* root, int arr[], int top) {
 			//start = start->next;
 		}
 	}
+}
+
+void buildCodeBook() {
+	printf("this will build the codebook\n");
+	mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+ 	int CB = creat("HuffmanCodeBook", mode);
+ 	//write(CB, "working", strlen("working"));
+	write(CB, "/\n", strlen("/\n"));
+	struct huffmanNode *ptr = head;
+	while (ptr != NULL) {
+		int i = 0;
+		for (i = 0; i < ptr->limit; i++) {
+			char* c = "a";
+			if (ptr->code[i] == 0) {
+				c = "0";
+			} else if (ptr->code[i] == 1) {
+				c = "1";
+			}
+			write(CB, c, strlen(c));
+		}
+		write(CB, " ", strlen(" "));
+		write(CB, ptr->token, strlen(ptr->token));
+		write(CB, "\n", strlen("\n"));
+		ptr = ptr->next;
+	}
+	write(CB, "\n", strlen("\n"));
 }
 
 void compressString(char* str) {

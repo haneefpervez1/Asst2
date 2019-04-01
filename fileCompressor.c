@@ -32,6 +32,7 @@ void buildCB(char * file, int fd)
  	{
  	 
  	}
+
 }
 void compress(char * file, int fd, char* codebook)
 {
