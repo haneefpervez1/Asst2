@@ -38,10 +38,10 @@ void buildCB(char * file, int fd)
  	 i++;
  	 //printf("%c", buff[0]);
  	}
- for(i=0;i<strlen(string);i++)
+ /*for(i=0;i<strlen(string);i++)
  {
   printf("%c", string[i]);
- }
+ }*/
  tokenizeString(string);
  /*for(i=0;i<limit;i++)
  {
@@ -72,7 +72,8 @@ void printDirectory() {
 	}
 	closedir(dr);
 }
-void Recursive(char * flag, char * path, char * codebook) {
+void Recursive(char * flag, char * path, char * codebook, int cont) {
+	int index=0;
 	int i;
 	int check=0;
 	struct dirent *de;
@@ -97,7 +98,7 @@ void Recursive(char * flag, char * path, char * codebook) {
 		 strcat(temp, "/");
 		 strcat(temp, de->d_name);
 		 //printf("%s\n", temp);
-		 Recursive(flag, temp, codebook);
+		 Recursive(flag, temp, codebook, index++);
 		}
 		else
 		{
@@ -128,11 +129,21 @@ void Recursive(char * flag, char * path, char * codebook) {
 		}
 	}
 	closedir(dr);
-	if (check==1)
+	if (check==1 && index==0)
 	{
 	for(i=0;i<limit;i++)
  	{
-  	printf("%s\n %d", tokens[i]->item, tokens[i]->freq);
+  	printf("%s\n", tokens[i]->item);
+ 	}
+	 buildHeap();
+ 	 buildHuffmanTree();
+ 	 buildCodeBook();
+	}
+	if (check==2 && index==0)
+	{
+	for(i=0;i<limit;i++)
+ 	{
+  	printf("%s\n", tokens[i]->item);
  	}
 	 buildHeap();
  	 buildHuffmanTree();
@@ -174,7 +185,7 @@ int main (int argc, char ** argv)
  	  return 0;
 	  }
  	  codebook = argv[4];
- 	  Recursive(flag2, file, codebook);
+ 	  Recursive(flag2, file, codebook, 0);
  	 break;
  	}
   return 0;

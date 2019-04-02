@@ -56,7 +56,7 @@ int isLeaf(struct heapNode *);
 void compressTree (struct heapNode*, int [], int);
 void buildCodeBook();
 void compressString(char*);
-void decompressString(struct huffmanNode* , char* );
+void decompressString(struct huffmanNode* , char*, char*);
 void printCode(char*);
 void printPreorder(struct heapNode *node);
 void printHeap();
@@ -69,7 +69,8 @@ void compress( char * file, int fd, char* codebook);
 void decompress( char * file, int fd, char* codebook);
 struct huffmanNode* readCodeBook(char*);
 void reverse(struct huffmanNode**);
-void Recursive(char * flag, char * path, char * codebook);
+void Recursive(char * flag, char * path, char * codebook, int cont);
+
 
 
 
