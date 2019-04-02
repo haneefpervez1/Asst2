@@ -67,6 +67,10 @@ void printDirectory();
 void buildCB( char * file, int fd);
 void compress( char * file, int fd, char* codebook);
 void decompress( char * file, int fd, char* codebook);
+struct huffmanNode* readCodeBook(char*);
+void reverse(struct huffmanNode**);
+void Recursive(char * flag, char * path, char * codebook);
+
 
 
 

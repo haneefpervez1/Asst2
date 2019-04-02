@@ -26,7 +26,7 @@ void buildCB(char * file, int fd)
  int i=1;
  char buff[1];
  int x = read(fd, buff, 1);
- char string[1000];
+ char string[10000];
  string[0]=buff[0]; 
  	while(x!=0)
  	{
@@ -42,24 +42,11 @@ void buildCB(char * file, int fd)
  {
   printf("%c", string[i]);
  }
- /*for(i=0;buff[i]!='\0';i++)
- {
-  stringlength++;
- }
- char string[stringlength];
- for(i=0;buff[i]!='\0';i++)
- {
-  string[i]=buff[i];
-  printf("%c", string[i]);
- }*/
  tokenizeString(string);
- for(i=0;i<limit;i++)
+ /*for(i=0;i<limit;i++)
  {
   printf("%s", tokens[i]->item);
- }
- buildHeap();
- buildHuffmanTree();
- buildCodeBook();
+ }*/
 }
 void compress(char * file, int fd, char* codebook)
 {
@@ -75,7 +62,7 @@ void printDirectory() {
 	*/
 	struct dirent *de;
 	
-	DIR *dr = opendir(".");
+	DIR *dr = opendir("./");
 	
 	if (dr == NULL) {
 		printf("error\n");
@@ -85,9 +72,77 @@ void printDirectory() {
 	}
 	closedir(dr);
 }
+void Recursive(char * flag, char * path, char * codebook) {
+	int i;
+	int check=0;
+	struct dirent *de;
+	
+	DIR * dr = opendir(path);
+
+	
+	if (dr == NULL) {
+		printf("error\n");
+		return;
+	}
+	while ((de = readdir(dr)) != NULL) {
+		if( de->d_type == DT_DIR)
+		{
+		 if( (strcmp(de->d_name, ".") == 0) || (strcmp(de->d_name, "..") == 0))
+		 {
+		  continue;
+		 }
+		 printf("%s\n", de->d_name);
+		 char * temp = (char*) malloc(sizeof(path) + sizeof(de -> d_name) + 2);
+		 strcpy(temp, path);
+		 strcat(temp, "/");
+		 strcat(temp, de->d_name);
+		 //printf("%s\n", temp);
+		 Recursive(flag, temp, codebook);
+		}
+		else
+		{
+		 char * temp = (char*) malloc(sizeof(path) + sizeof(de -> d_name) + 2);
+		 strcpy(temp, path);
+		 strcat(temp, "/");
+		 strcat(temp, de->d_name);
+		 //printf("%s\n", de->d_name);
+		 int fd;
+		 	switch(flag[1])
+ 				{
+ 		 		case('b'):
+ 	 			fd = open(temp, O_RDONLY | O_CREAT);
+ 	 			buildCB(temp, fd);
+ 	 			close(fd); 
+ 	 			check=1;
+ 				// printf("%d", fd);
+ 				break;
+ 	 			case('c'):
+ 	 			 fd = open(temp, O_RDONLY | O_CREAT); 
+ 	 			 compress(temp, fd, codebook);
+ 	 			 close(fd);
+ 	 			 break;
+ 	 			case('d'):
+ 	 			 //decompress(file, fd, codebook);
+ 	 			 break;
+				}
+		}
+	}
+	closedir(dr);
+	if (check==1)
+	{
+	for(i=0;i<limit;i++)
+ 	{
+  	printf("%s\n %d", tokens[i]->item, tokens[i]->freq);
+ 	}
+	 buildHeap();
+ 	 buildHuffmanTree();
+ 	 buildCodeBook();
+	}
+}
 int main (int argc, char ** argv)
 {
  int fd;
+ char* flag2;
  char* flag = argv[1];
  char* file = argv[2];
  char* codebook = argv[3];
@@ -98,6 +153,9 @@ int main (int argc, char ** argv)
  	 case('b'):
  	  fd = open(file, O_RDONLY | O_CREAT);
  	  buildCB(file, fd);
+ 	  buildHeap();
+ 	  buildHuffmanTree();
+ 	  buildCodeBook();
  	  close(fd);
  	 // printf("%d", fd);
  	  break;
@@ -109,7 +167,14 @@ int main (int argc, char ** argv)
  	  //decompress(file, fd, codebook);
  	  break;
  	 case('R'):
- 	  
+ 	  flag2 = argv[2];
+ 	  file = argv[3];
+ 	  if(flag2==NULL)
+ 	  {
+ 	  return 0;
+	  }
+ 	  codebook = argv[4];
+ 	  Recursive(flag2, file, codebook);
  	 break;
  	}
   return 0;
@@ -487,4 +552,149 @@ void printPreorder(struct heapNode *node) {
   
      /* now recur on right subtree */
     printPreorder(node->right); 
+}
+struct huffmanNode* readCodeBook(char* file) {
+int fd1 = open(file, O_RDONLY);
+char* example = (char*)malloc(2*sizeof(char));
+int f = read(fd1, example, 2);
+//int* codes = (int*)malloc(sizeof(int));
+//printf("first time\n");
+int codeCounter = 0;
+int stringCounter = 0;
+struct huffmanNode* root = NULL;
+while (f != 0) {
+f = read(fd1, example, 1);
+if (example[0] == '0' || example[0] == '1') {
+codeCounter++;
+}
+if (example[0] == '\t') {
+//printf("codecounter %d\n", codeCounter);
+struct huffmanNode* temp = (struct huffmanNode*)malloc(sizeof(struct
+huffmanNode));
+temp->limit = codeCounter;
+temp->code = (int*)malloc(codeCounter*sizeof(int));
+//printf("%d has been malloced\n",codeCounter);
+temp->token = NULL;
+if (root == NULL) {
+root = temp;
+} else {
+temp->next = root;
+root = temp;
+
+}
+codeCounter = 0;
+}
+if (isalpha(example[0])) {
+stringCounter++;
+}
+if (example[0] == '\n') {
+if (stringCounter != 0) {
+root->token = (char*)malloc((stringCounter+1)*sizeof(char));
+root->token[stringCounter] = '\0';
+//printf("%d can be insertred\n", stringCounter);
+//strcpy(ptr->token, "s");
+stringCounter = 0;
+}
+//printf("string counter %d\n", stringCounter);
+}
+//printf("%s", example);
+}
+reverse(&root);
+struct huffmanNode* ptr = root;
+/*
+while (ptr != NULL) {
+printf("root is %s %d\n", ptr->token, ptr->limit);
+ptr = ptr->next;
+}
+*/
+close(fd1);
+ptr = root;
+int fd2 = open(file, O_RDONLY);
+int p = read(fd2, example, 2);
+//printf("second\n");
+while (p != 0) {
+p = read(fd2, example, 1);
+if (example[0] == '0' || example[0] == '1') {
+int digit = 0;
+if (example[0] == '1') {
+digit = 1;
+}
+ptr->code[codeCounter] = digit;
+codeCounter++;
+}
+if (example[0] == '\t') {
+/*
+printf("this is the code array\n");
+int i = 0;
+for (i = 0; i < ptr->limit; i++) {
+printf("%d", ptr->code[i]);
+}
+*/
+//ptr = ptr->next;
+codeCounter = 0;
+}
+if (isalpha(example[0])) {
+ptr->token[stringCounter] = example[0];
+stringCounter++;
+}
+if (example[0] == '\n') {
+if (stringCounter != 0) {
+//printf("string counter %d\n", stringCounter);
+//ptr->token[stringCounter] = '\0';
+//printf("%s has been inserted\n", ptr->token);
+/*
+struct huffmanNode* start = root;
+while (start != NULL) {
+printf("%s: ", start->token);
+int i = 0;
+for (i = 0; i < start->limit; i++) {
+printf("%d", start->code[i]);
+}
+printf("\n");
+start = start->next;
+}
+*/
+/*
+if (ptr->next == NULL) {
+printf("%s last thing\n", ptr->token);
+}
+*/
+ptr = ptr->next;
+stringCounter = 0;
+}
+}
+//printf("%s", example);
+}
+/*
+struct huffmanNode* start = root;
+while (start != NULL) {
+printf("%s: ", start->token);
+int i = 0;
+for (i = 0; i < start->limit; i++) {
+printf("%d", start->code[i]);
+}
+printf("\n");
+start = start->next;
+}
+*/
+return root;
+}
+
+void reverse(struct huffmanNode** head_ref) {
+    struct huffmanNode* prev   = NULL;
+    struct huffmanNode* current = *head_ref;
+    struct huffmanNode* next = NULL;
+    while (current != NULL)
+    {
+        // Store next
+        next  = current->next;
+
+        // Reverse current node's pointer
+        current->next = prev;
+
+        // Move pointers one position ahead.
+        prev = current;
+        current = next;
+    }
+    *head_ref = prev;
 }
