@@ -50,11 +50,75 @@ void buildCB(char * file, int fd)
 }
 void compress(char * file, int fd, char* codebook)
 {
-  
+  int i=1;
+ char buff[1];
+ int x = read(fd, buff, 1);
+ char string[10000];
+ string[0]=buff[0];
+  while(x!=0)
+  {
+  x = read(fd, buff, 1);
+  if(buff[0]!='\n')
+  {
+  string[i]=buff[0];
+  }
+  i++;
+  //printf("%c", buff[0]);
+  }
+ for(i=0;i<strlen(string);i++)
+ {
+  printf("%c", string[i]);
+ }
+
+  struct huffmanNode* codes = readCodeBook(codebook);
+struct huffmanNode* ptr = codes;
+while (ptr != NULL) {
+printf("%s: ", ptr->token);
+int i  =0;
+for (i = 0; i < ptr->limit; i++) {
+printf("%d", ptr->code[i]);
+}
+printf("\n");
+ptr = ptr->next;
+}
+//char* temp = "11111";
+compressString(string, codes);
 }
 void decompress(char* file, int fd, char* codebook)
 {
- 
+ int i=1;
+ char buff[1];
+ int x = read(fd, buff, 1);
+ char string[10000];
+ string[0]=buff[0];
+  while(x!=0)
+  {
+  x = read(fd, buff, 1);
+  if(buff[0]!='\n')
+  {
+  string[i]=buff[0];
+  }
+  i++;
+  //printf("%c", buff[0]);
+  }
+ for(i=0;i<strlen(string);i++)
+ {
+  printf("%c", string[i]);
+ }
+
+  struct huffmanNode* codes = readCodeBook(codebook);
+struct huffmanNode* ptr = codes;
+while (ptr != NULL) {
+printf("%s: ", ptr->token);
+int i  =0;
+for (i = 0; i < ptr->limit; i++) {
+printf("%d", ptr->code[i]);
+}
+printf("\n");
+ptr = ptr->next;
+}
+//char* temp = "11111";
+decompressString(codes, string, file);
 }
 void printDirectory() {
 	/*
@@ -121,6 +185,7 @@ void Recursive(char * flag, char * path, char * codebook, int cont) {
  	 			 fd = open(temp, O_RDONLY | O_CREAT); 
  	 			 compress(temp, fd, codebook);
  	 			 close(fd);
+ 	 			 check=2;
  	 			 break;
  	 			case('d'):
  	 			 //decompress(file, fd, codebook);
@@ -139,16 +204,13 @@ void Recursive(char * flag, char * path, char * codebook, int cont) {
  	 buildHuffmanTree();
  	 buildCodeBook();
 	}
-	if (check==2 && index==0)
+	/*if (check==2 && index==0)
 	{
 	for(i=0;i<limit;i++)
  	{
   	printf("%s\n", tokens[i]->item);
  	}
-	 buildHeap();
- 	 buildHuffmanTree();
- 	 buildCodeBook();
-	}
+	}*/
 }
 int main (int argc, char ** argv)
 {
@@ -173,9 +235,12 @@ int main (int argc, char ** argv)
  	 case('c'):
  	  fd = open(file, O_RDONLY | O_CREAT); 
  	  compress(file, fd, codebook);
+ 	  close(fd);
  	  break;
  	 case('d'):
- 	  //decompress(file, fd, codebook);
+ 	  fd = open(file, O_RDONLY | O_CREAT);
+    	  decompress(file, fd, codebook);
+    	  close(fd);
  	  break;
  	 case('R'):
  	  flag2 = argv[2];
@@ -407,7 +472,7 @@ void buildCodeBook() {
 			}
 			write(CB, c, strlen(c));
 		}
-		write(CB, " ", strlen(" "));
+		write(CB, "\t", strlen("\t"));
 		write(CB, ptr->token, strlen(ptr->token));
 		write(CB, "\n", strlen("\n"));
 		ptr = ptr->next;
@@ -415,7 +480,7 @@ void buildCodeBook() {
 	write(CB, "\n", strlen("\n"));
 }
 
-void compressString(char* str) {
+void compressString(char* str, struct huffmanNode * ptr) {
 	int length = strlen(str);
 	int i = 0, j = 0;							   
 	for (i = 0, j = 0; i < length+1; i++){         
@@ -424,7 +489,7 @@ void compressString(char* str) {
 			char* substr = malloc(length+1);
 			strncpy(substr, str+j, length); 	   
 			substr[length] = '\0';
-			printCode(substr);
+			printCode(substr, ptr);
 			while (str[i] == ' ') {
 				i++;
 			}
@@ -434,103 +499,109 @@ void compressString(char* str) {
 	printf("\n");
 }
 
-void decompressString(struct huffmanNode* codeBook, char* str) {
-	/*
-		Read in shit from code book to huffNode ll and get token and code - still need to implement
-		readShit();
-	*/
+void decompressString(struct huffmanNode* codeBook, char* str, char * file) {
 	struct heapNode *root = (struct heapNode*)malloc(sizeof(struct heapNode));
-	root->item = "tree";
-	root->freq = 0;
-	root->left = NULL;
-	root->right = NULL;
-	struct huffmanNode* ptr = codeBook;
-	while (ptr != NULL) {
-		int i = 0;
-		struct heapNode* first = root;
-		for (i = 0; i < ptr->limit; i++) {
-			//printf("%d ", ptr->code[i]);
-			if (ptr->code[i] == 0) {
-				//printf("go left\n");
-				struct heapNode *temp = (struct heapNode*)malloc(sizeof(struct heapNode));
-				if (i+1 == ptr->limit) {
-					//printf("inserting %s\n", ptr->token);
-					int length = strlen(ptr->token);
-					temp->item = (char*)malloc((length+1)*sizeof(char));
-					strcpy(temp->item, ptr->token);
-					temp->freq = 0;
-				} else {
-				//	printf("inserting tree\n");
-					temp->item = (char*)malloc(5*sizeof(char));
-					//strcpy(temp->item, "left");
-					temp->freq = 0;
-				}
-				//temp->left = NULL;
-				//temp->right = NULL;
-				//printf("inserting %s\n");
-				if (first->left == NULL) {
-					first->left = temp;
-				}
-				first = first->left;
-			} if (ptr->code[i] == 1) {
-				//printf("go right\n");
-				struct heapNode *temp = (struct heapNode*)malloc(sizeof(struct heapNode));
-				if (i+1 == ptr->limit) {
-				//	printf("inserting %s\n", ptr->token);
-					int length = strlen(ptr->token);
-					temp->item = (char*)malloc((length+1)*sizeof(char));
-					strcpy(temp->item, ptr->token);
-					temp->freq = 0;
-				} else {
-					//printf("inserting placeholder\n");
-					temp->item = (char*)malloc(6*sizeof(char));
-					strcpy(temp->item, "right");
-					temp->freq = 0;
-				}
-				//temp->left = NULL;
-				//temp->right = NULL;
-				//printf("inserting %s\n", );
-				if (first->right == NULL) {
-					first->right = temp;
-				}
-				first = first->right;
-			}
-		}
-		//printf("------\n");
-		ptr = ptr->next;
-	}
-	//printPreorder(root);
-	//printf("\nstr %s\n", str);
-	int length = strlen(str);
-	struct heapNode *first = root;
-	//printPreorder(first);
-	//printf("\n");
-	int i = 0;
-	for (i = 0; i < length; i++) {
-		if (str[i] == '0') {
-			first = first->left;
-		}
-		if (str[i] == '1') {
-			first = first->right;
-		}
-		if (isLeaf(first) == 1) {
-			printf("%s ", first->item);
-			first = root;
-		}
-	}
-	printf("\n");
-	/*
-	while (ptr != NULL) {
-		
-		ptr = ptr->next;
-	}
-	*/
+root->item = "tree";
+root->freq = 0;
+root->left = NULL;
+root->right = NULL;
+struct huffmanNode* ptr = codeBook;
+while (ptr != NULL) {
+int i = 0;
+struct heapNode* first = root;
+for (i = 0; i < ptr->limit; i++) {
+//printf("%d ", ptr->code[i]);
+if (ptr->code[i] == 0) {
+//printf("go left\n");
+struct heapNode *temp = (struct heapNode*)malloc(sizeof(struct heapNode));
+if (i+1 == ptr->limit) {
+//printf("inserting %s\n", ptr->token);
+int length = strlen(ptr->token);
+temp->item = (char*)malloc((length+1)*sizeof(char));
+strcpy(temp->item, ptr->token);
+temp->freq = 0;
+} else {
+// printf("inserting tree\n");
+temp->item = (char*)malloc(5*sizeof(char));
+//strcpy(temp->item, "left");
+temp->freq = 0;
+}
+//temp->left = NULL;
+//temp->right = NULL;
+//printf("inserting %s\n");
+if (first->left == NULL) {
+first->left = temp;
+}
+first = first->left;
+} if (ptr->code[i] == 1) {
+//printf("go right\n");
+struct heapNode *temp = (struct heapNode*)malloc(sizeof(struct heapNode));
+if (i+1 == ptr->limit) {
+// printf("inserting %s\n", ptr->token);
+int length = strlen(ptr->token);
+temp->item = (char*)malloc((length+1)*sizeof(char));
+strcpy(temp->item, ptr->token);
+temp->freq = 0;
+} else {
+//printf("inserting placeholder\n");
+temp->item = (char*)malloc(6*sizeof(char));
+strcpy(temp->item, "right");
+temp->freq = 0;
+}
+//temp->left = NULL;
+//temp->right = NULL;
+//printf("inserting %s\n", );
+if (first->right == NULL) {
+first->right = temp;
+}
+first = first->right;
+}
+}
+//printf("------\n");
+ptr = ptr->next;
+}
+//printPreorder(root);
+//printf("\nstr %s\n", str);
+int length = strlen(str);
+struct heapNode *first = root;
+//printPreorder(first);
+//printf("\n");
+printf("file %s\n", file);
+int resultLength = ((int)strlen(file)) - 4;
+printf("result length %d\n", resultLength);
+char * resultFile = (char*)malloc(resultLength*sizeof(char));
+strncpy(resultFile, file, resultLength);
+printf("resultFile %s \n", resultFile);
+mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+  int result = creat(resultFile, mode);
+int i = 0;
+for (i = 0; i < length; i++) {
+if (str[i] == '0') {
+first = first->left;
+}
+if (str[i] == '1') {
+first = first->right;
+}
+if (isLeaf(first) == 1) {
+//printf("%s ", first->item);
+write(result, first->item, strlen(first->item));
+write(result, " ", strlen(" "));
+first = root;
+}
+}
+printf("\n");
+/*
+while (ptr != NULL) {
+ptr = ptr->next;
+}
+*/
+
 }
 
-void printCode(char* str) {
+void printCode(char* str, struct huffmanNode * ptr) {
 	//printf("%s will be compressed ", str);
 	
-	struct huffmanNode * start = head;
+	struct huffmanNode * start = ptr;
 	while (start != NULL) {
 		if (strcmp(start->token, str) == 0) {
 			int i = 0;
