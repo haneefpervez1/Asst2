@@ -1,26 +1,32 @@
 #include "fileCompressor.h"
+/*
+	Builds a codebook for a file
+*/
 void buildCB(char * file, int fd)
 {
- int i=1;
- char buff[1];
- int x = read(fd, buff, 1);
- char string[10000];
- string[0]=buff[0]; 
- 	while(x!=0)
- 	{
- 	 x = read(fd, buff, 1);
- 	 if(buff[0]!='\n')
- 	 {
- 	 	string[i]=buff[0];
- 	 }
- 	 i++;
- 	}
- tokenizeString(string);
+	int i=1;
+	char buff[1];
+	int x = read(fd, buff, 1);
+	char string[10000];
+	string[0]=buff[0]; 
+	 	while(x!=0)
+	 	{
+	 	x = read(fd, buff, 1);
+		 	 if(buff[0]!='\n')
+		 	 {
+		 	 	string[i]=buff[0];
+		 	 }
+	 	 i++;
+	 	}
+	tokenizeString(string);
 }
+/*
+	Compresses a file
+*/
 void compress(char * file, int fd, char* codebook)
 {
 	int i=0;
-	int index=0;
+	int index;
 	char buff[1];
 	int x = read(fd, buff, 1);
 	char string[10000];
@@ -33,58 +39,34 @@ void compress(char * file, int fd, char* codebook)
   		}
   	x = read(fd, buff, 1);
   }
-	index=i;
-	for(i=0;i<index;i++)
- 	{
-  		printf("%c", string[i]);
- 	}
-struct huffmanNode* codes = readCodeBook(codebook);
-struct huffmanNode* ptr = codes;
-while (ptr != NULL) {
-printf("%s: ", ptr->token);
-int i  =0;
-for (i = 0; i < ptr->limit; i++) {
-printf("%d", ptr->code[i]);
+	struct huffmanNode* codes = readCodeBook(codebook);
+	compressString(string, codes, file);
 }
-printf("\n");
-ptr = ptr->next;
-}
-compressString(string, codes, file);
-}
+/*
+	Decompresses a file
+*/
 void decompress(char* file, int fd, char* codebook)
 {
- int i=1;
- char buff[1];
- int x = read(fd, buff, 1);
- char string[10000];
- string[0]=buff[0];
-  while(x!=0)
-  {
-  x = read(fd, buff, 1);
-  if(buff[0]!='\n')
-  {
-  string[i]=buff[0];
-  }
-  i++;
-  }
- for(i=0;i<strlen(string);i++)
- {
-  printf("%c", string[i]);
- }
-
-  struct huffmanNode* codes = readCodeBook(codebook);
-struct huffmanNode* ptr = codes;
-while (ptr != NULL) {
-printf("%s: ", ptr->token);
-int i  =0;
-for (i = 0; i < ptr->limit; i++) {
-printf("%d", ptr->code[i]);
+	int i=1;
+	char buff[1];
+	int x = read(fd, buff, 1);
+	char string[10000];
+	string[0]=buff[0];
+	while(x!=0)
+	{
+		x = read(fd, buff, 1);
+		if(buff[0]!='\n')
+		{
+		string[i]=buff[0];
+		}
+		i++;
+	}
+	struct huffmanNode* codes = readCodeBook(codebook);
+	decompressString(codes, string, file);
 }
-printf("\n");
-ptr = ptr->next;
-}
-decompressString(codes, string, file);
-}
+/*
+	Prints a directory
+*/
 void printDirectory() {
 	struct dirent *de;
 	
@@ -98,6 +80,9 @@ void printDirectory() {
 	}
 	closedir(dr);
 }
+/*
+	Recursively goes file path
+*/
 void Recursive(char * flag, char * path, char * codebook, int cont) {
 	int index=0;
 	int i;
@@ -215,12 +200,12 @@ void tokenizeString (char* str) {
 	int length = strlen(str);
 	int i = 0, j = 0;
 	for (i = 0, j = 0; i < length+1; i++){
-		if (str[i] == '\0' || str[i] == ' '){   // !!!!checks non alphanumeric char instead only spaces
+		if (str[i] == '\0' || str[i] == ' '){   
 		int length = i-j;
 		char* substr = malloc(length+1);
 		strncpy(substr, str+j, length);
 		substr[length] = '\0';
-		int present = checkIfPresent(substr);
+		int present = checkIfPresent(substr); // adds tokens to token array
 			if (present == -1) {
 				struct heapNode* temp= (struct heapNode*)malloc(sizeof(struct heapNode));
 				temp->item = (char*)malloc((length+1)*sizeof(char));
@@ -229,9 +214,9 @@ void tokenizeString (char* str) {
 				temp->left = NULL;
 				temp->right = NULL;
 				tokens[limit] = temp;
-				limit++; // make sure tokens[] doesnt seg fault
+				limit++; 
 			}
-			while (str[i] == ' ') {
+			while (str[i] == ' ') {			// adds space to token array
 				char* temp1 = "$s";
 				int check = checkIfPresent(temp1);
 				if (check == -1) {
@@ -260,7 +245,7 @@ int checkIfPresent (char* str) {
 	int i = 0;
 	for (i = 0; i < limit; i++) {
 		if (strcmp(tokens[i]->item, str) == 0) {
-			tokens[i]->freq = tokens[i]->freq + 1;
+			tokens[i]->freq = tokens[i]->freq + 1;		// increases freq
 			return i;
 		}
 	}
@@ -270,19 +255,16 @@ int checkIfPresent (char* str) {
 	Bubbles inserted heap node
 */
 void bubbleUp(int index) {
-	//printf("%s: %d will be bubbled up\n", minHeap[index]->item, minHeap[index]->freq);
 	int parentIndex = (int)(ceil((double)(index-2)/2));
 	if (parentIndex < 0) {
 		parentIndex = 0;
 	}
-	//printf("the node containing %s %d at %d will be bubbled up and the parent is %d\n", minHeap[index]->item, minHeap[index]->freq, index, parentIndex);
 	while (minHeap[parentIndex]->freq > minHeap[index]->freq) {
-		//printf("node %s: %d will swapped with %s: %d\n", minHeap[index]->item, minHeap[index]->freq, minHeap[parentIndex]->item, minHeap[parentIndex]->freq);
-		struct heapNode* temp = minHeap[parentIndex];
+		struct heapNode* temp = minHeap[parentIndex];		//swaps with parent
 		minHeap[parentIndex] = minHeap[index];
-		minHeap[index] = temp;
+		minHeap[index] = temp;								
 		index = parentIndex;
-		parentIndex = (int)(ceil((double)(index-2)/2));
+		parentIndex = (int)(ceil((double)(index-2)/2));		// getting parent index
 		if (parentIndex < 0) {
 			parentIndex = 0;
 		}
@@ -294,7 +276,7 @@ void bubbleUp(int index) {
 void buildHeap() {
 	int i = 0;
 	for (i = 0; i < limit; i++) {
-		insertHeap(tokens[i]);
+		insertHeap(tokens[i]);			// insert tokens one by one
 	}
 }
 /*
@@ -303,27 +285,26 @@ void buildHeap() {
 void insertHeap(struct heapNode *toBeInserted) {
 	//printf("item: %s freq: %d will be inserted at %d\n", toBeInserted->item, toBeInserted->freq, heapIndex);
 	minHeap[heapIndex] = toBeInserted;
-	if (heapIndex != 0) {
+	if (heapIndex != 0) {			// bubble up after insertion
 		bubbleUp(heapIndex);
 	}
 	heapIndex++;
 }
 /*
-	deletes min
+	deletes min from heap
 */
 struct heapNode* deleteMin() {
 	struct heapNode *min = minHeap[0];
 	heapIndex--;
-	minHeap[0] = minHeap[heapIndex];
+	minHeap[0] = minHeap[heapIndex];	// swap first and last node
 	minHeap[heapIndex] = NULL;
-	bubbleDown(0);
+	bubbleDown(0);				// bubble down after deletion
 	return min;
 }
 /*
 	bubble down method for heap
 */
 void bubbleDown(int index) {
-	//printf("%s: %d will be bubbled down\n", minHeap[index]->item, minHeap[index]->freq);
 	int smallest = index;
 	int left = 2 * index + 1;
 	int right = 2 * index + 2;
@@ -334,14 +315,15 @@ void bubbleDown(int index) {
 		smallest = right;
 	}
 	if (smallest != index) {
-		//printf("node %s: %d will swapped with %s: %d\n", minHeap[index]->item, minHeap[index]->freq, minHeap[smallest]->item, minHeap[smallest]->freq);
 		struct heapNode* temp = minHeap[smallest];
 		minHeap[smallest] = minHeap[index];
 		minHeap[index] = temp;
 		bubbleDown(smallest);
 	}
 }
-
+/*
+	Builds a tree out of two nodes from the min heap, node1 and node2 may also be trees
+*/
 void buildTree(struct heapNode* node1, struct heapNode* node2) {
 	//printf("a node will be built with %s %d and %s %d\n", node1->item, node1->freq, node2->item, node2->freq);
 	struct heapNode * newNode = (struct heapNode*)malloc(sizeof(struct heapNode));
@@ -352,7 +334,9 @@ void buildTree(struct heapNode* node1, struct heapNode* node2) {
 	newNode->right = node2;
 	insertHeap(newNode);
 }
-
+/*
+	makes the final huffman tree
+*/
 void buildHuffmanTree() {
 		
 		while (heapIndex != 2) {
@@ -360,7 +344,7 @@ void buildHuffmanTree() {
 			struct heapNode *temp2 = deleteMin();
 			buildTree(temp1, temp2);
 		}
-		if (heapIndex == 2) {
+		if (heapIndex == 2) {						// reduces all nodes to one tree
 			struct heapNode* temp1 = minHeap[0];
 			struct heapNode* temp2 = minHeap[1];
 			minHeap[0] = NULL;
@@ -368,20 +352,22 @@ void buildHuffmanTree() {
 			heapIndex = 0;
 			buildTree(temp1, temp2);
 		}
-		//printHeap();
-		//printPreorder(minHeap[0]);
 		int arr[100], top = 0;
 		compressTree(minHeap[0], arr, top);
 
 }
-
+/*
+	Checks if given node is leaf node
+*/
 int isLeaf(struct heapNode * node) {
 	if (node->left == NULL && node->right == NULL) {
 		return 1;
 	}
 	return 0;
 }
-
+/*
+	Makes a linked list that holds all the tokens and the corressponding encoding
+*/
 void compressTree (struct heapNode* root, int arr[], int top) {
 	if (root->left != NULL) {
 		arr[top] = 0;
@@ -395,13 +381,13 @@ void compressTree (struct heapNode* root, int arr[], int top) {
 		//printf(" leaf %s: %d\n", root->item, root->freq);
 		int* encoding = (int*)malloc(top*sizeof(int));
 		int i = 0;
-		for (i = 0; i < top; i++) {
+		for (i = 0; i < top; i++) {						// making code []
 			encoding[i] = arr[i];
 		}
 		struct huffmanNode* temp = (struct huffmanNode*)malloc(sizeof(struct huffmanNode));
 		int length = strlen(root->item);
 		//printf("%d\n", length);
-		temp->token = (char*)malloc((length+1)*sizeof(char));
+		temp->token = (char*)malloc((length+1)*sizeof(char));		// adding to LL for tokens and encodings
 		strcpy(temp->token, root->item);
 		temp->token[length] = '\0';
 		temp->code = encoding;
@@ -414,15 +400,16 @@ void compressTree (struct heapNode* root, int arr[], int top) {
 				start = start->next; 
 			}
 			start->next = temp;
-			//start = start->next;
 		}
 	}
 }
-
+/*
+	Creates a HuffmanCodebook file and puts the encodings and tokens with the proper formatting
+*/
 void buildCodeBook() {
-	printf("this will build the codebook\n");
+	//printf("this will build the codebook\n");
 	mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
- 	int CB = creat("HuffmanCodebook", mode);
+ 	int CB = creat("HuffmanCodebook", mode);			// creating file
  	//write(CB, "working", strlen("working"));
 	write(CB, "/\n", strlen("/\n"));
 	struct huffmanNode *ptr = head;
@@ -444,8 +431,11 @@ void buildCodeBook() {
 	}
 	write(CB, "\n", strlen("\n"));
 }
+/*
+	Takes a file and changes the string inside to the huffman encoding
+*/
 void compressString(char* str, struct huffmanNode * ptr, char* file) {
-	strcat(file, ".hcz");
+	strcat(file, ".hcz");		// creating file name
 	mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
 	int result = creat(file, mode);
 	//printf("result%d\n", result);
@@ -459,9 +449,9 @@ void compressString(char* str, struct huffmanNode * ptr, char* file) {
 			strncpy(substr, str+j, length);
 			substr[length] = '\0';
 			char* tempString = (char*)malloc(5*sizeof(char));
-			tempString = printCode(substr, ptr);
+			tempString = printCode(substr, ptr);				// this function gets the code for the token
 			write(result, tempString, strlen(tempString));
-			while (str[i] == ' ') {
+			while (str[i] == ' ') {							// to deal with spaces
 				char* temporaryString = printCode("$s", ptr);
 				write(result, temporaryString, strlen(temporaryString));
 				i++;
@@ -469,11 +459,12 @@ void compressString(char* str, struct huffmanNode * ptr, char* file) {
 			j = i;
 		}
 	}
-	printf("\n");
 }
-
+/*
+	This function takes a HuffmanCodebook file and builds the corresponding huffman tree
+*/
 void decompressString(struct huffmanNode* codeBook, char* str, char * file) {
-	struct heapNode *root = (struct heapNode*)malloc(sizeof(struct heapNode));
+	struct heapNode *root = (struct heapNode*)malloc(sizeof(struct heapNode));	// this will be the tree made from codebook
 	root->item = "tree";
 	root->freq = 0;
 	root->left = NULL;
@@ -484,7 +475,7 @@ void decompressString(struct huffmanNode* codeBook, char* str, char * file) {
 		struct heapNode* first = root;
 		for (i = 0; i < ptr->limit; i++) {
 			//printf("%d ", ptr->code[i]);
-			if (ptr->code[i] == 0) {
+			if (ptr->code[i] == 0) {	// going left and building node, if not leaf node, just make placeholder for traversal
 				//printf("go left\n");
 				struct heapNode *temp = (struct heapNode*)malloc(sizeof(struct heapNode));
 				if (i+1 == ptr->limit) {
@@ -501,7 +492,7 @@ void decompressString(struct huffmanNode* codeBook, char* str, char * file) {
 					first->left = temp;
 				}
 				first = first->left;
-			} if (ptr->code[i] == 1) {
+			} if (ptr->code[i] == 1) { 	/// going left and building node, if not leaf node, just make placeholder for traversal
 				struct heapNode *temp = (struct heapNode*)malloc(sizeof(struct heapNode));
 				if (i+1 == ptr->limit) {
 					int length = strlen(ptr->token);
@@ -523,15 +514,16 @@ void decompressString(struct huffmanNode* codeBook, char* str, char * file) {
 	}
 	int length = strlen(str);
 	struct heapNode *first = root;
-	printf("file %s\n", file);
+	//printf("file %s\n", file);
 	int resultLength = ((int)strlen(file)) - 4;
-	printf("result length %d\n", resultLength);
+	//printf("result length %d\n", resultLength);
 	char * resultFile = (char*)malloc(resultLength*sizeof(char));
 	strncpy(resultFile, file, resultLength);
-	printf("resultFile %s \n", resultFile);
+	//printf("resultFile %s \n", resultFile);
 	mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
 	int result = creat(resultFile, mode);
 	int i = 0;
+	// traversing tree
 	for (i = 0; i < length; i++) {
 		if (str[i] == '0') {
 			first = first->left;
@@ -540,7 +532,7 @@ void decompressString(struct huffmanNode* codeBook, char* str, char * file) {
 			first = first->right;
 		}
 		if (isLeaf(first) == 1) {
-		if (strcmp(first->item, "$s") == 0) {
+		if (strcmp(first->item, "$s") == 0) {		// if node is leaf node print token
 			write(result, " ", strlen(" "));
 		} else {
 			write(result, first->item, strlen(first->item));
@@ -548,10 +540,11 @@ void decompressString(struct huffmanNode* codeBook, char* str, char * file) {
 		first = root;
 		}
 	}
-	printf("\n");
 
 }
-
+/*
+	Returns the encoding for a token
+*/
 char* printCode(char* str, struct huffmanNode * ptr) {
 	struct huffmanNode * start = ptr;
 	while (start != NULL) {
@@ -574,6 +567,9 @@ char* printCode(char* str, struct huffmanNode * ptr) {
 	}
 	return NULL;
 }
+/*
+	Reads a HuffmanCodebook file and fills the LL that holds the token and encodings
+*/
 struct huffmanNode* readCodeBook(char* file) {
 	int fd1 = open(file, O_RDONLY);
 	char* example = (char*)malloc(2*sizeof(char));
@@ -646,8 +642,9 @@ struct huffmanNode* readCodeBook(char* file) {
 
 	return root;
 }
-
-
+/*
+	prints the heap
+*/
 void printHeap() {
 	printf("----min heap----\n");
 	int i = 0;
@@ -656,32 +653,27 @@ void printHeap() {
 		}
 	printf("----------------\n");
 }
-
+/*
+	prints a tree using preorder traversal
+*/
 void printPreorder(struct heapNode *node) { 
     if (node == NULL) 
           return;
-     /* first print data of node */
     printf("%s ", node->item);   
-  	
-     /* then recur on left sutree */
     printPreorder(node->left);   
-  
-     /* now recur on right subtree */
     printPreorder(node->right); 
 }
+/*
+	Reverses a LL
+*/
 void reverse(struct huffmanNode** head_ref) {
     struct huffmanNode* prev   = NULL;
     struct huffmanNode* current = *head_ref;
     struct huffmanNode* next = NULL;
     while (current != NULL)
     {
-        // Store next
         next  = current->next;
-
-        // Reverse current node's pointer
         current->next = prev;
-
-        // Move pointers one position ahead.
         prev = current;
         current = next;
     }
