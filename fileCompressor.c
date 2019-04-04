@@ -139,6 +139,7 @@ void Recursive(char * flag, char * path, char * codebook, int cont) {
 	  			if(codebook==NULL)
 				  {
 				  	printf("Error. No codebook given");
+					return;
 				  }
  	 			 fd = open(temp, O_RDONLY | O_CREAT); 
  	 			 compress(temp, fd, codebook);
@@ -154,6 +155,7 @@ void Recursive(char * flag, char * path, char * codebook, int cont) {
 				 if(codebook==NULL)
 				  {
 				  	printf("Error. No codebook given");
+					return;
 				  }
  	 			 fd = open(temp, O_RDONLY | O_CREAT);
  	 			 decompress(temp, fd, codebook);
