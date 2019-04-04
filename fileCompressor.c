@@ -26,7 +26,6 @@ void buildCB(char * file, int fd)
 void compress(char * file, int fd, char* codebook)
 {
 	int i=0;
-	int index;
 	char buff[1];
 	int x = read(fd, buff, 1);
 	char string[10000];
@@ -121,18 +120,41 @@ void Recursive(char * flag, char * path, char * codebook, int cont) {
 		 	switch(flag[1])
  				{
  		 		case('b'):
+ 				if (codebook !=NULL)
+ 				  {
+ 				   printf("Error. Huffman Codebook already provided.");
+ 				   return;
+ 				  }
  	 			fd = open(temp, O_RDONLY | O_CREAT);
  	 			buildCB(temp, fd);
  	 			close(fd); 
  	 			check=1;
  				break;
  	 			case('c'):
+ 			  	if(de->d_type!=DT_REG)
+			  	{
+	  				printf("Error. Only compress regular files");
+	  				return;
+	  			}
+	  			if(codebook==NULL)
+				  {
+				  	printf("Error. No codebook given");
+				  }
  	 			 fd = open(temp, O_RDONLY | O_CREAT); 
  	 			 compress(temp, fd, codebook);
  	 			 close(fd);
  	 			 check=2;
  	 			 break;
  	 			case('d'):
+ 	 			 if(strstr(temp, ".hcz") ==NULL)
+				 {
+				  	printf("Error. Only decompress regular files with type .hcz extension");
+			 	  	return;
+				 }
+				 if(codebook==NULL)
+				  {
+				  	printf("Error. No codebook given");
+				  }
  	 			 fd = open(temp, O_RDONLY | O_CREAT);
  	 			 decompress(temp, fd, codebook);
  	 			 close(fd);
@@ -154,14 +176,31 @@ void Recursive(char * flag, char * path, char * codebook, int cont) {
 }
 int main (int argc, char ** argv)
 {
+ if(argc>5)
+ {
+  printf("Error. Too mnay input argumetns");
+  return 0;
+ }
+ if(argc<3)
+ {
+  printf("Error: Too few inputs");
+  return 0;
+ }
  int fd;
  char* flag2;
  char* flag = argv[1];
  char* file = argv[2];
  char* codebook = argv[3];
+ struct dirent *de;
+ DIR * dr = opendir(".");
  	switch(flag[1])
  	{
  	 case('b'):
+ 	 if (argv[3] !=NULL)
+ 	  {
+ 	   printf("Error. Huffman Codebook already provided.");
+ 	   return 0;
+ 	  }
  	  fd = open(file, O_RDONLY | O_CREAT);
  	  buildCB(file, fd);
  	  buildHeap();
@@ -171,11 +210,35 @@ int main (int argc, char ** argv)
  	 // printf("%d", fd);
  	  break;
  	 case('c'):
+ 	  if(dr!=NULL)
+ 	  {
+ 	  de = readdir(dr);
+ 	  	if(de->d_type!=DT_REG)
+	  	{
+	  		printf("Error. Only compress regular files");
+	  		return 0;
+	  	}
+ 	  }
+ 	  if(codebook==NULL)
+	  {
+	  	printf("Error. No codebook given");
+	  	return 0;
+	  }
  	  fd = open(file, O_RDONLY | O_CREAT); 
  	  compress(file, fd, codebook);
  	  close(fd);
  	  break;
  	 case('d'):
+ 	  if(strstr(file, ".hcz") ==NULL)
+ 	  {
+ 	  	printf("Error. Only decompress regular files with type .hcz extension");
+ 	  	return 0;
+	  }
+	  if(codebook==NULL)
+	  {
+	  	printf("Error. No codebook given");
+	  	return 0;
+	  }
  	  fd = open(file, O_RDONLY | O_CREAT);
     	  decompress(file, fd, codebook);
     	  close(fd);
@@ -183,9 +246,10 @@ int main (int argc, char ** argv)
  	 case('R'):
  	  flag2 = argv[2];
  	  file = argv[3];
- 	  if(flag2==NULL)
+ 	  if(flag2[1] != 'b' || flag2[1] != 'c' || flag2[1] != 'd' )
  	  {
- 	  return 0;
+ 	  	printf("Error. No flag of either -c, -b, or -d indicated");
+ 	  	return 0;
 	  }
  	  codebook = argv[4];
  	  Recursive(flag2, file, codebook, 0);

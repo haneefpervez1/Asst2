@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <unistd.h>
+#include <sys/sysmacros.h>
 
 /*
 	BST struct
